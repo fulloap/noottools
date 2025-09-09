@@ -207,9 +207,14 @@ export function TokenCreation() {
                 </Button>
                 
                 {!isConnected && (
-                  <p className="text-sm text-muted-foreground text-center mt-2">
-                    Necesitas conectar una wallet de Solana para crear tokens
-                  </p>
+                  <div className="text-center mt-2 space-y-2">
+                    <p className="text-sm text-muted-foreground">
+                      ⚠️ Wallet no conectada - Usa el botón "Conectar Wallet" arriba
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Requiere Phantom Wallet instalada
+                    </p>
+                  </div>
                 )}
                 
                 {transactionSignature && (

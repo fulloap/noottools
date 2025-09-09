@@ -41,20 +41,44 @@ export function useSolanaWallet() {
     setIsConnecting(true);
     
     try {
+      console.log('Attempting to connect Phantom wallet...');
+      
+      // Check if we're in browser environment
+      if (typeof window === 'undefined') {
+        throw new Error('Browser environment required');
+      }
+
+      // Check if Phantom is installed
+      if (!window.solana) {
+        throw new Error('Phantom wallet not installed. Please install from https://phantom.app/');
+      }
+
+      if (!window.solana.isPhantom) {
+        throw new Error('Please use Phantom wallet. Other wallets are not currently supported.');
+      }
+
       const connectedWallet = await solanaService.connectPhantomWallet();
       setWallet(connectedWallet);
       
+      console.log('Wallet connected successfully:', connectedWallet.publicKey);
+      
       toast({
-        title: "Wallet Conectada",
-        description: `Phantom wallet conectada exitosamente`,
+        title: "Wallet Conectada ✅",
+        description: `Phantom wallet conectada: ${connectedWallet.publicKey?.slice(0, 8)}...`,
       });
     } catch (error: any) {
       console.error('Wallet connection error:', error);
       
-      if (error.message.includes('not installed')) {
+      if (error.message.includes('not installed') || error.message.includes('not found')) {
         toast({
           title: "Phantom Wallet Requerida",
-          description: "Por favor instala la extensión de Phantom wallet para continuar",
+          description: "Instala Phantom desde https://phantom.app/ y recarga la página",
+          variant: "destructive",
+        });
+      } else if (error.message.includes('rejected by user')) {
+        toast({
+          title: "Conexión Cancelada",
+          description: "Debes aprobar la conexión en Phantom para continuar",
           variant: "destructive",
         });
       } else {

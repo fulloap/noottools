@@ -66,11 +66,11 @@ export function Header({ onNavigate }: HeaderProps) {
               <Button 
                 onClick={connectWallet}
                 disabled={isConnecting}
-                className="gradient-purple text-white font-medium hover:opacity-90 transition-opacity"
+                className="gradient-purple text-white font-medium hover:opacity-90 transition-opacity animate-pulse"
                 data-testid="button-connect-wallet"
               >
                 <WalletIcon className="w-4 h-4 mr-2" />
-                {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
+                {isConnecting ? 'Conectando...' : '🔗 Conectar Wallet'}
               </Button>
             )}
           </nav>

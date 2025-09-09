@@ -85,12 +85,18 @@ export class SolanaService {
       throw new Error('Wallet connection only available in browser');
     }
 
+    console.log('Checking for Phantom wallet...');
+    console.log('window.solana exists:', !!window.solana);
+    console.log('window.solana.isPhantom:', window.solana?.isPhantom);
+
     // Check if Phantom is available
     if (!window.solana) {
+      console.error('Phantom wallet not detected');
       throw new Error('Phantom wallet not found. Please install Phantom wallet extension from https://phantom.app/');
     }
 
     if (!window.solana.isPhantom) {
+      console.error('Non-Phantom wallet detected');
       throw new Error('Please use Phantom wallet. Other wallets are not currently supported.');
     }
 
@@ -98,6 +104,8 @@ export class SolanaService {
       // Request connection permission from user
       console.log('Requesting Phantom wallet connection...');
       const response = await window.solana.connect();
+      
+      console.log('Connection response received:', response);
       
       if (!response || !response.publicKey) {
         throw new Error('Failed to get wallet public key. Please try connecting again.');
