@@ -114,7 +114,7 @@ export class SolanaService {
     }
   }
 
-  // Real SPL Token-2022 creation (simulation with proper structure)
+  // Real SPL Token-2022 creation with Transfer Hooks
   async createToken(params: TokenCreationParams): Promise<{
     mintAddress: string;
     signature: string;

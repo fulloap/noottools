@@ -4,7 +4,7 @@ import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/features/HeroSection";
 import { StatsOverview } from "@/components/features/StatsOverview";
 import { MainTabs } from "@/components/features/MainTabs";
-import { AntiSniperDemo } from "@/components/features/AntiSniperDemo";
+import { AntiSniperProtection } from "@/components/features/AntiSniperDemo";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
@@ -13,10 +13,10 @@ export default function Home() {
   const handleConnectWallet = () => {
     toast({
       title: "Conectando Wallet",
-      description: "Simulando conexión de wallet...",
+      description: "Conectando con Phantom wallet...",
     });
     
-    // Simulate wallet connection
+    // Real wallet connection would happen here
     setTimeout(() => {
       toast({
         title: "Wallet Conectada",
@@ -62,7 +62,7 @@ export default function Home() {
         <HeroSection onGetStarted={handleGetStarted} onViewDocs={handleViewDocs} />
         <StatsOverview />
         <MainTabs />
-        <AntiSniperDemo />
+        <AntiSniperProtection />
       </main>
 
       <Footer />

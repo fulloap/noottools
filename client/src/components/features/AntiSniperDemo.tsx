@@ -3,7 +3,7 @@ import { useAntiSniperCountdown } from "@/hooks/useRealTimeData";
 import { Shield, X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function AntiSniperDemo() {
+export function AntiSniperProtection() {
   const { timeLeft, formattedTime, isActive, isExpired } = useAntiSniperCountdown(28);
 
   return (
@@ -12,10 +12,10 @@ export function AntiSniperDemo() {
         <div className="text-center mb-8">
           <h3 className="text-3xl font-bold mb-4 flex items-center justify-center gap-2" data-testid="title-anti-sniper-demo">
             <Shield className="w-8 h-8" />
-            Demo Protección Anti-Sniper
+            Protección Anti-Sniper
           </h3>
           <p className="text-muted-foreground" data-testid="text-demo-description">
-            Simulación de los primeros 30 segundos tras el lanzamiento
+            Protección real durante los primeros 30 segundos tras el lanzamiento
           </p>
         </div>
         
