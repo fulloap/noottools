@@ -63,6 +63,7 @@ export class MemStorage implements IStorage {
     const token: Token = { 
       ...insertToken, 
       id, 
+      decimals: insertToken.decimals ?? 9,
       mintAddress: null,
       createdAt: new Date() 
     };
@@ -144,7 +145,7 @@ export class MemStorage implements IStorage {
     this.burnEvents.set(id, burnEvent);
     
     // Update total burned in stats
-    const currentBurned = parseInt(this.stats.totalBurned);
+    const currentBurned = parseInt(this.stats.totalBurned || "0");
     const newBurned = parseInt(insertBurnEvent.amount);
     this.stats.totalBurned = (currentBurned + newBurned).toString();
     this.stats.updatedAt = new Date();
@@ -165,8 +166,8 @@ export class MemStorage implements IStorage {
 
   async updateStats(): Promise<Stats> {
     // Simulate real-time updates
-    this.stats.totalVolume = (parseFloat(this.stats.totalVolume) + Math.random() * 1000).toFixed(2);
-    this.stats.totalHolders += Math.floor(Math.random() * 3);
+    this.stats.totalVolume = (parseFloat(this.stats.totalVolume || "0") + Math.random() * 1000).toFixed(2);
+    this.stats.totalHolders = (this.stats.totalHolders || 0) + Math.floor(Math.random() * 3);
     this.stats.updatedAt = new Date();
     
     return this.stats;

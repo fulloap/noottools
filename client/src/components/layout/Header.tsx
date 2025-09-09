@@ -1,12 +1,14 @@
 import { MobileMenu } from "@/components/ui/mobile-menu";
 import { Button } from "@/components/ui/button";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { Wallet, WalletIcon } from "lucide-react";
 
 interface HeaderProps {
   onNavigate: (section: string) => void;
-  onConnectWallet: () => void;
 }
 
-export function Header({ onNavigate, onConnectWallet }: HeaderProps) {
+export function Header({ onNavigate }: HeaderProps) {
+  const { isConnected, isConnecting, connectWallet, disconnectWallet, getShortAddress } = useSolanaWallet();
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container mx-auto px-4 py-4">
@@ -43,13 +45,34 @@ export function Header({ onNavigate, onConnectWallet }: HeaderProps) {
             >
               Estado
             </button>
-            <Button 
-              onClick={onConnectWallet}
-              className="gradient-purple text-white font-medium hover:opacity-90 transition-opacity"
-              data-testid="button-connect-wallet"
-            >
-              Conectar Wallet
-            </Button>
+            {isConnected ? (
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-2 px-3 py-2 bg-green-500/20 border border-green-500/30 rounded-lg">
+                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                  <span className="text-green-400 font-medium" data-testid="text-wallet-address">
+                    {getShortAddress()}
+                  </span>
+                </div>
+                <Button 
+                  onClick={disconnectWallet}
+                  variant="outline"
+                  size="sm"
+                  data-testid="button-disconnect-wallet"
+                >
+                  Desconectar
+                </Button>
+              </div>
+            ) : (
+              <Button 
+                onClick={connectWallet}
+                disabled={isConnecting}
+                className="gradient-purple text-white font-medium hover:opacity-90 transition-opacity"
+                data-testid="button-connect-wallet"
+              >
+                <WalletIcon className="w-4 h-4 mr-2" />
+                {isConnecting ? 'Conectando...' : 'Conectar Wallet'}
+              </Button>
+            )}
           </nav>
         </div>
       </div>

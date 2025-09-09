@@ -8,15 +8,19 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Shield, Check } from "lucide-react";
+import { Shield, Check, ExternalLink } from "lucide-react";
 import { insertTokenSchema } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { solanaService } from "@/lib/solana";
 import { cn } from "@/lib/utils";
 
 export function TokenCreation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isConnected, wallet } = useSolanaWallet();
+  const [transactionSignature, setTransactionSignature] = useState<string | null>(null);
   
   const form = useForm({
     resolver: zodResolver(insertTokenSchema),
@@ -30,27 +34,56 @@ export function TokenCreation() {
 
   const createTokenMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await apiRequest("POST", "/api/tokens", data);
-      return response.json();
+      if (!isConnected) {
+        throw new Error('Wallet no conectada');
+      }
+      
+      // Create token on Solana blockchain
+      const tokenResult = await solanaService.createToken({
+        name: data.name,
+        symbol: data.symbol,
+        decimals: data.decimals,
+        totalSupply: data.totalSupply
+      });
+      
+      // Also save to backend for tracking
+      const response = await apiRequest("POST", "/api/tokens", {
+        ...data,
+        mintAddress: tokenResult.mintAddress
+      });
+      
+      return {
+        ...await response.json(),
+        solanaData: tokenResult
+      };
     },
-    onSuccess: () => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ["/api/stats"] });
+      setTransactionSignature(result.solanaData.signature);
       toast({
-        title: "Token Creado",
-        description: "Tu token SPL-2022 ha sido creado exitosamente",
+        title: "Token Creado Exitosamente! 🎉",
+        description: `${result.symbol} creado en Solana con anti-sniper protection`,
       });
       form.reset();
     },
-    onError: () => {
+    onError: (error: any) => {
       toast({
         title: "Error",
-        description: "Hubo un problema creando el token",
+        description: error.message || "Hubo un problema creando el token",
         variant: "destructive",
       });
     },
   });
 
   const onSubmit = (data: any) => {
+    if (!isConnected) {
+      toast({
+        title: "Wallet Requerida",
+        description: "Por favor conecta tu wallet de Solana para crear tokens",
+        variant: "destructive"
+      });
+      return;
+    }
     createTokenMutation.mutate(data);
   };
 
@@ -163,11 +196,41 @@ export function TokenCreation() {
                 <Button 
                   type="submit" 
                   className="w-full py-4 gradient-purple text-white font-semibold hover:opacity-90 transition-opacity"
-                  disabled={createTokenMutation.isPending}
+                  disabled={createTokenMutation.isPending || !isConnected}
                   data-testid="button-create-token"
                 >
-                  {createTokenMutation.isPending ? "Creando..." : "Crear Token (0.01 SOL gas)"}
+                  {createTokenMutation.isPending ? "Creando en Blockchain..." : 
+                   !isConnected ? "Conecta Wallet para Crear" : 
+                   "Crear Token en Solana (~0.01 SOL)"}
                 </Button>
+                
+                {!isConnected && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    Necesitas conectar una wallet de Solana para crear tokens
+                  </p>
+                )}
+                
+                {transactionSignature && (
+                  <Card className="bg-green-500/10 border-green-500/30 mt-4">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-green-400">¡Token Creado!</div>
+                          <div className="text-sm text-muted-foreground">Verificar en Solscan</div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(`https://solscan.io/tx/${transactionSignature}?cluster=devnet`, '_blank')}
+                          data-testid="button-view-transaction"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Ver TX
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </form>
             </Form>
           </CardContent>

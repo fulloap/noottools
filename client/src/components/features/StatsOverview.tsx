@@ -26,28 +26,28 @@ export function StatsOverview() {
     <section className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-16">
       <Card className="glass-card p-6 text-center hover-elevate">
         <div className="text-3xl font-bold text-primary mb-2" data-testid="stat-total-tokens">
-          {formatNumber(stats.totalTokensCreated)}
+          {formatNumber(stats.totalTokensCreated || 0)}
         </div>
         <div className="text-muted-foreground">Tokens Creados</div>
       </Card>
       
       <Card className="glass-card p-6 text-center hover-elevate">
         <div className="text-3xl font-bold text-chart-2 mb-2" data-testid="stat-total-volume">
-          {formatCurrency(parseFloat(stats.totalVolume))}
+          {formatCurrency(parseFloat(stats.totalVolume || "0"))}
         </div>
         <div className="text-muted-foreground">Volumen Total</div>
       </Card>
       
       <Card className="glass-card p-6 text-center hover-elevate">
         <div className="text-3xl font-bold text-chart-3 mb-2" data-testid="stat-total-burned">
-          {formatNumber(stats.totalBurned)}
+          {formatNumber(stats.totalBurned || "0")}
         </div>
         <div className="text-muted-foreground">$NOOT Quemados</div>
       </Card>
       
       <Card className="glass-card p-6 text-center hover-elevate">
         <div className="text-3xl font-bold text-chart-4 mb-2" data-testid="stat-total-holders">
-          {formatNumber(stats.totalHolders)}
+          {formatNumber(stats.totalHolders || 0)}
         </div>
         <div className="text-muted-foreground">Holders Totales</div>
       </Card>

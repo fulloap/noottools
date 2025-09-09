@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TokenCreation } from "./TokenCreation";
-import { PoolCreation } from "./PoolCreation";
-import { EscrowStatus } from "./EscrowStatus";
-import { BuyAndBurn } from "./BuyAndBurn";
+import { TokenCreation } from "@/components/features/TokenCreation";
+import { PoolCreation } from "@/components/features/PoolCreation";
+import { EscrowStatus } from "@/components/features/EscrowStatus";
+import { BuyAndBurn } from "@/components/features/BuyAndBurn";
 
 export function MainTabs() {
   const [activeTab, setActiveTab] = useState("crear-token");
