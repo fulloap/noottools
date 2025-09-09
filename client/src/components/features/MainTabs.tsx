@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TokenCreation } from "@/components/features/TokenCreation";
 import { PoolCreation } from "@/components/features/PoolCreation";
@@ -8,8 +8,28 @@ import { BuyAndBurn } from "@/components/features/BuyAndBurn";
 export function MainTabs() {
   const [activeTab, setActiveTab] = useState("crear-token");
 
+  // Listen for hash changes to activate corresponding tab
+  useEffect(() => {
+    const handleHashChange = () => {
+      const hash = window.location.hash.substring(1);
+      if (hash && ['crear-token', 'crear-pool', 'estado', 'burn'].includes(hash)) {
+        setActiveTab(hash);
+      }
+    };
+
+    // Check initial hash
+    handleHashChange();
+
+    // Listen for hash changes
+    window.addEventListener('hashchange', handleHashChange);
+    
+    return () => {
+      window.removeEventListener('hashchange', handleHashChange);
+    };
+  }, []);
+
   return (
-    <section className="mb-16">
+    <section className="mb-16" id="main-tabs">
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-4 bg-muted/30">
           <TabsTrigger value="crear-token" data-testid="tab-crear-token">
@@ -27,19 +47,19 @@ export function MainTabs() {
         </TabsList>
 
         <div className="mt-8">
-          <TabsContent value="crear-token">
+          <TabsContent value="crear-token" id="crear-token">
             <TokenCreation />
           </TabsContent>
 
-          <TabsContent value="crear-pool">
+          <TabsContent value="crear-pool" id="crear-pool">
             <PoolCreation />
           </TabsContent>
 
-          <TabsContent value="estado">
+          <TabsContent value="estado" id="estado">
             <EscrowStatus />
           </TabsContent>
 
-          <TabsContent value="burn">
+          <TabsContent value="burn" id="burn">
             <BuyAndBurn />
           </TabsContent>
         </div>

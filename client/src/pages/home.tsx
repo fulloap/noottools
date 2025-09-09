@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/features/HeroSection";
@@ -31,6 +31,17 @@ export default function Home() {
       element.scrollIntoView({ behavior: "smooth" });
     }
   };
+
+  // Handle navigation from URL hash on page load
+  useEffect(() => {
+    const hash = window.location.hash.substring(1); // Remove the # character
+    if (hash) {
+      // Small delay to ensure the page has rendered
+      setTimeout(() => {
+        handleNavigate(hash);
+      }, 100);
+    }
+  }, []);
 
   const handleGetStarted = () => {
     handleNavigate("crear-token");

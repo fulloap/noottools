@@ -43,10 +43,10 @@ export function Footer() {
           <div>
             <h5 className="font-bold mb-4" data-testid="text-product-title">Producto</h5>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-crear-token">Crear Token</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-crear-pool">Crear Pool</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-escrow">Escrow</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-buy-burn">Buy & Burn</a></li>
+              <li><a href="/#crear-token" className="hover:text-primary transition-colors" data-testid="link-crear-token">Crear Token</a></li>
+              <li><a href="/#crear-pool" className="hover:text-primary transition-colors" data-testid="link-crear-pool">Crear Pool</a></li>
+              <li><a href="/#estado" className="hover:text-primary transition-colors" data-testid="link-escrow">Escrow</a></li>
+              <li><a href="/#burn" className="hover:text-primary transition-colors" data-testid="link-buy-burn">Buy & Burn</a></li>
             </ul>
           </div>
           
