@@ -19,8 +19,15 @@ import { cn } from "@/lib/utils";
 export function TokenCreation() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { isConnected, wallet } = useSolanaWallet();
+  const { isConnected, wallet, publicKey } = useSolanaWallet();
   const [transactionSignature, setTransactionSignature] = useState<string | null>(null);
+
+  // Debug logging
+  console.log('TokenCreation render:', { 
+    isConnected, 
+    publicKey, 
+    walletExists: !!wallet 
+  });
   
   const form = useForm({
     resolver: zodResolver(insertTokenSchema),
@@ -200,10 +207,18 @@ export function TokenCreation() {
                   className="w-full py-4 gradient-purple text-white font-semibold hover:opacity-90 transition-opacity"
                   disabled={createTokenMutation.isPending || !isConnected}
                   data-testid="button-create-token"
+                  onClick={(e) => {
+                    console.log('Button clicked - Debug info:', {
+                      isConnected,
+                      publicKey,
+                      isPending: createTokenMutation.isPending,
+                      disabled: createTokenMutation.isPending || !isConnected
+                    });
+                  }}
                 >
-                  {createTokenMutation.isPending ? "Creando en Blockchain..." : 
-                   !isConnected ? "Conecta Wallet para Crear" : 
-                   "Crear Token en Solana (~0.01 SOL)"}
+                  {createTokenMutation.isPending ? "🔄 Creando en Blockchain..." : 
+                   !isConnected ? "❌ Conecta Wallet para Crear" : 
+                   `✅ Crear Token en Solana (${publicKey?.slice(0, 4)}...)`}
                 </Button>
                 
                 {!isConnected && (

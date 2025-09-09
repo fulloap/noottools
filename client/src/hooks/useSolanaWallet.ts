@@ -61,6 +61,11 @@ export function useSolanaWallet() {
       setWallet(connectedWallet);
       
       console.log('Wallet connected successfully:', connectedWallet.publicKey);
+      console.log('Wallet state after connection:', {
+        publicKey: connectedWallet.publicKey,
+        isConnected: connectedWallet.isConnected,
+        walletObject: !!connectedWallet
+      });
       
       toast({
         title: "Wallet Conectada ✅",
@@ -116,6 +121,14 @@ export function useSolanaWallet() {
 
   // Check if wallet is connected
   const isConnected = wallet?.isConnected || false;
+  
+  // Debug logging for connection state
+  console.log('useSolanaWallet state:', {
+    walletExists: !!wallet,
+    walletPublicKey: wallet?.publicKey,
+    walletIsConnected: wallet?.isConnected,
+    computedIsConnected: isConnected
+  });
 
   // Get wallet address (shortened)
   const getShortAddress = useCallback(() => {
