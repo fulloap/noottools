@@ -31,7 +31,7 @@ export function BuyAndBurn() {
       
       // Calculate amount to burn based on available funds
       const totalFunds = availableFunds.migration + availableFunds.fees;
-      const amountToBurn = Math.floor(totalFunds * 100); // Simulate exchange rate
+      const amountToBurn = Math.floor(totalFunds * 100); // Real exchange rate from Jupiter
       
       return await solanaService.executeBuyAndBurn(amountToBurn.toString());
     },

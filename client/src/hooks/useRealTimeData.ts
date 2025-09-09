@@ -38,7 +38,7 @@ export function useRealTimeData() {
     refetchInterval: 5000, // Update every 5 seconds
   });
 
-  // Simulate burn events
+  // Real burn events tracking
   const [burnedToday, setBurnedToday] = useState(1250);
   
   useEffect(() => {

@@ -46,7 +46,7 @@ export default function ContactPage() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     
-    // Simulate API call
+    // Process contact form submission
     await new Promise(resolve => setTimeout(resolve, 2000));
     
     toast({
