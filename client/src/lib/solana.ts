@@ -62,6 +62,7 @@ declare global {
 export class SolanaService {
   private wallet: SolanaWallet | null = null;
   private network: string = 'devnet';
+  private useRealImplementation: boolean = true; // Toggle to use real blockchain
 
   constructor(network: string = 'devnet') {
     this.network = network;
@@ -165,27 +166,36 @@ export class SolanaService {
     }
 
     try {
-      console.log('Creating SPL Token-2022 with Transfer Hooks...', params);
-      
-      // Real token creation processing time
-      await new Promise(resolve => setTimeout(resolve, 3000));
-      
-      // Generate realistic-looking mint address
-      const mintAddress = this.generateSolanaMintAddress();
-      const signature = this.generateSolanaSignature();
-      
-      console.log('Token created successfully:', {
-        mintAddress,
-        signature,
-        antiSniper: params.antiSniperEnabled,
-        transferHook: params.transferHookEnabled
-      });
-      
-      return {
-        mintAddress,
-        signature,
-        transferHookProgram: params.transferHookEnabled ? this.generateSolanaProgramId() : undefined
-      };
+      if (this.useRealImplementation) {
+        console.log('Using REAL blockchain implementation for token creation...');
+        
+        // Import and use the real implementation
+        const { realSolanaService } = await import('./solana-real');
+        realSolanaService.setWallet(this.wallet);
+        
+        return await realSolanaService.createToken(params);
+      } else {
+        // Fallback to simulation for testing
+        console.log('Creating SPL Token-2022 with Transfer Hooks (simulation)...', params);
+        
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        
+        const mintAddress = this.generateSolanaMintAddress();
+        const signature = this.generateSolanaSignature();
+        
+        console.log('Token created successfully:', {
+          mintAddress,
+          signature,
+          antiSniper: params.antiSniperEnabled,
+          transferHook: params.transferHookEnabled
+        });
+        
+        return {
+          mintAddress,
+          signature,
+          transferHookProgram: params.transferHookEnabled ? this.generateSolanaProgramId() : undefined
+        };
+      }
 
     } catch (error) {
       console.error('Token creation failed:', error);
@@ -207,28 +217,36 @@ export class SolanaService {
     }
 
     try {
-      console.log('Creating liquidity pool with 60% LP escrow...', params);
-      
-      // Real pool creation processing
-      await new Promise(resolve => setTimeout(resolve, 4000));
-      
-      // Calculate LP tokens and escrow amounts
-      const tokenAmount = parseFloat(params.tokenAmount);
-      const quoteAmount = parseFloat(params.quoteAmount);
-      const lpTokensReceived = Math.sqrt(tokenAmount * quoteAmount).toString();
-      const escrowAmount = (parseFloat(lpTokensReceived) * ESCROW_THRESHOLDS.LP_LOCK_PERCENTAGE / 100).toString();
-      
-      const result = {
-        poolAddress: this.generateSolanaPoolAddress(),
-        lpMint: this.generateSolanaMintAddress(),
-        signature: this.generateSolanaSignature(),
-        lpTokensReceived,
-        escrowAmount,
-        escrowAddress: this.generateSolanaEscrowAddress()
-      };
+      if (this.useRealImplementation) {
+        console.log('Using REAL blockchain implementation for pool creation...');
+        
+        const { realSolanaService } = await import('./solana-real');
+        realSolanaService.setWallet(this.wallet);
+        
+        return await realSolanaService.createLiquidityPool(params);
+      } else {
+        // Simulation fallback
+        console.log('Creating liquidity pool with 60% LP escrow (simulation)...', params);
+        
+        await new Promise(resolve => setTimeout(resolve, 4000));
+        
+        const tokenAmount = parseFloat(params.tokenAmount);
+        const quoteAmount = parseFloat(params.quoteAmount);
+        const lpTokensReceived = Math.sqrt(tokenAmount * quoteAmount).toString();
+        const escrowAmount = (parseFloat(lpTokensReceived) * ESCROW_THRESHOLDS.LP_LOCK_PERCENTAGE / 100).toString();
+        
+        const result = {
+          poolAddress: this.generateSolanaPoolAddress(),
+          lpMint: this.generateSolanaMintAddress(),
+          signature: this.generateSolanaSignature(),
+          lpTokensReceived,
+          escrowAmount,
+          escrowAddress: this.generateSolanaEscrowAddress()
+        };
 
-      console.log('Pool created with escrow:', result);
-      return result;
+        console.log('Pool created with escrow:', result);
+        return result;
+      }
 
     } catch (error) {
       console.error('Pool creation failed:', error);
@@ -248,20 +266,35 @@ export class SolanaService {
     }
 
     try {
-      console.log('Executing buy-and-burn with Jupiter aggregator...', amount);
-      
-      // Real Jupiter swap and burn execution
-      await new Promise(resolve => setTimeout(resolve, 3500));
-      
-      const result = {
-        signature: this.generateSolanaSignature(),
-        amountBurned: amount,
-        route: ['SOL', 'USDC', 'NOOT'],
-        burnAddress: '11111111111111111111111111111112' // Solana burn address
-      };
+      if (this.useRealImplementation) {
+        console.log('Using REAL blockchain implementation for buy-and-burn...');
+        
+        const { realSolanaService } = await import('./solana-real');
+        realSolanaService.setWallet(this.wallet);
+        
+        const result = await realSolanaService.executeBuyAndBurn(amount);
+        return {
+          signature: result.signature,
+          amountBurned: result.amountBurned,
+          route: ['USDC', 'NOOT'],
+          burnAddress: '11111111111111111111111111111112'
+        };
+      } else {
+        // Simulation fallback
+        console.log('Executing buy-and-burn with Jupiter aggregator (simulation)...', amount);
+        
+        await new Promise(resolve => setTimeout(resolve, 3500));
+        
+        const result = {
+          signature: this.generateSolanaSignature(),
+          amountBurned: amount,
+          route: ['SOL', 'USDC', 'NOOT'],
+          burnAddress: '11111111111111111111111111111112'
+        };
 
-      console.log('Buy-and-burn executed:', result);
-      return result;
+        console.log('Buy-and-burn executed:', result);
+        return result;
+      }
 
     } catch (error) {
       console.error('Buy-and-burn failed:', error);
