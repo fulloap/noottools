@@ -52,6 +52,11 @@ export default function Home() {
       title: "Redirigiendo",
       description: "Abriendo documentación...",
     });
+    
+    // Navegar a la página de documentación
+    setTimeout(() => {
+      window.location.href = "/docs";
+    }, 500);
   };
 
   return (
