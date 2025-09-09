@@ -84,33 +84,73 @@ export class SolanaService {
       throw new Error('Wallet connection only available in browser');
     }
 
-    if (!window.solana || !window.solana.isPhantom) {
-      throw new Error('Phantom wallet not installed. Please install Phantom wallet extension.');
+    // Check if Phantom is available
+    if (!window.solana) {
+      throw new Error('Phantom wallet not found. Please install Phantom wallet extension from https://phantom.app/');
+    }
+
+    if (!window.solana.isPhantom) {
+      throw new Error('Please use Phantom wallet. Other wallets are not currently supported.');
     }
 
     try {
-      const response = await window.solana.connect();
+      // Request connection permission from user
+      console.log('Requesting Phantom wallet connection...');
+      const response = await window.solana.connect({ onlyIfTrusted: false });
+      
+      if (!response || !response.publicKey) {
+        throw new Error('Failed to get wallet public key. Please try connecting again.');
+      }
+
       const publicKey = response.publicKey.toString();
+      console.log('Phantom wallet connected successfully:', publicKey);
       
       this.wallet = {
         publicKey,
         isConnected: true,
         connect: async () => {
-          await window.solana!.connect();
+          try {
+            await window.solana!.connect();
+          } catch (err) {
+            console.error('Reconnection failed:', err);
+            throw new Error('Failed to reconnect wallet');
+          }
         },
         disconnect: async () => {
-          await window.solana!.disconnect();
-          this.wallet = null;
+          try {
+            await window.solana!.disconnect();
+            this.wallet = null;
+            console.log('Wallet disconnected');
+          } catch (err) {
+            console.error('Disconnection failed:', err);
+            throw new Error('Failed to disconnect wallet');
+          }
         },
         signTransaction: window.solana.signTransaction,
         signMessage: window.solana.signMessage
       };
 
-      console.log('Phantom wallet connected:', publicKey);
+      // Listen for wallet events
+      window.solana.on('connect', (publicKey: any) => {
+        console.log('Wallet connected event:', publicKey.toString());
+      });
+
+      window.solana.on('disconnect', () => {
+        console.log('Wallet disconnected event');
+        this.wallet = null;
+      });
+
       return this.wallet;
-    } catch (error) {
-      console.error('Failed to connect to Phantom wallet:', error);
-      throw new Error('Failed to connect to Phantom wallet. Please try again.');
+    } catch (error: any) {
+      console.error('Phantom wallet connection failed:', error);
+      
+      if (error.code === 4001) {
+        throw new Error('Connection rejected by user. Please approve the connection request.');
+      } else if (error.code === -32002) {
+        throw new Error('Connection request already pending. Please check your wallet.');
+      } else {
+        throw new Error(`Wallet connection failed: ${error.message || 'Unknown error'}`);
+      }
     }
   }
 

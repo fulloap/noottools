@@ -3,7 +3,6 @@ import { Shield, X, Check } from "lucide-react";
 
 export function AntiSniperProtection() {
   // Static 30-second protection display (no countdown)
-  const isActive = true; // Always show as active protection
   const protectionTime = "00:30";
 
   return (
