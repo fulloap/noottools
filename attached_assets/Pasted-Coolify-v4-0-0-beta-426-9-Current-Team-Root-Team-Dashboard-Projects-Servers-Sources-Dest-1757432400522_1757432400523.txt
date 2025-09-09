@@ -1,0 +1,289 @@
+Coolify
+v4.0.0-beta.426
+9+
+Current Team
+
+Root Team
+Dashboard
+Projects
+Servers
+Sources
+Destinations
+S3 Storages
+Shared Variables
+Notifications
+Keys & Tokens
+Tags
+Terminal
+Profile
+Teams
+Settings
+Sponsor us
+Feedback
+Logout
+Deployment
+NootTools
+production
+fulloap/noottools:main-b8k84s84sk0044wwg40cgwwo
+Exited
+Configuration
+Deployments
+Logs
+Terminal
+
+Links
+
+Advanced
+Deploy
+Deployment Log
+Show Debug Logs
+Deployment is Failed.
+
+
+
+
+2025-Sep-09 15:36:18.215808
+Starting deployment of fulloap/noottools:main to localhost.
+2025-Sep-09 15:36:18.408386
+Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.10.
+2025-Sep-09 15:36:20.927819
+----------------------------------------
+2025-Sep-09 15:36:20.931737
+Importing fulloap/noottools:main (commit sha HEAD) to /artifacts/zsswgk0owk8wgw4sg8s0ocsk.
+2025-Sep-09 15:36:22.423128
+Image not found (b8k84s84sk0044wwg40cgwwo:eb255f6a937f3ff6b192501c05c6acfef02edffe). Building new image.
+2025-Sep-09 15:36:24.136199
+----------------------------------------
+2025-Sep-09 15:36:24.144661
+Building docker image started.
+2025-Sep-09 15:36:24.148554
+To check the current progress, click on Show Debug Logs.
+2025-Sep-09 15:36:39.242697
+Oops something is not okay, are you okay? 😢
+2025-Sep-09 15:36:39.247457
+#0 building with "default" instance using docker driver
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#1 [internal] load build definition from Dockerfile
+2025-Sep-09 15:36:39.247457
+#1 transferring dockerfile: 1.72kB done
+2025-Sep-09 15:36:39.247457
+#1 DONE 0.0s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+2025-Sep-09 15:36:39.247457
+#2 DONE 0.6s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#3 [internal] load .dockerignore
+2025-Sep-09 15:36:39.247457
+#3 transferring context: 449B done
+2025-Sep-09 15:36:39.247457
+#3 DONE 0.0s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#4 [base  1/11] FROM docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722
+2025-Sep-09 15:36:39.247457
+#4 DONE 0.0s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#5 [internal] load build context
+2025-Sep-09 15:36:39.247457
+#5 transferring context: 771.42kB 0.0s done
+2025-Sep-09 15:36:39.247457
+#5 DONE 0.1s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#6 [production 5/9] COPY --from=base /app/node_modules ./node_modules
+2025-Sep-09 15:36:39.247457
+#6 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#7 [base  5/11] COPY tsconfig.json ./
+2025-Sep-09 15:36:39.247457
+#7 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#8 [base 10/11] COPY drizzle.config.ts ./
+2025-Sep-09 15:36:39.247457
+#8 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#9 [base  7/11] COPY tailwind.config.ts ./
+2025-Sep-09 15:36:39.247457
+#9 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#10 [production 3/9] RUN apk add --no-cache dumb-init
+2025-Sep-09 15:36:39.247457
+#10 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#11 [base  8/11] COPY postcss.config.js ./
+2025-Sep-09 15:36:39.247457
+#11 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#12 [base 11/11] RUN npm ci --only=production --ignore-scripts && npm cache clean --force
+2025-Sep-09 15:36:39.247457
+#12 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#13 [base  2/11] RUN apk add --no-cache python3 make g++ libc6-compat
+2025-Sep-09 15:36:39.247457
+#13 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#14 [production 2/9] WORKDIR /app
+2025-Sep-09 15:36:39.247457
+#14 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#15 [base  4/11] COPY package*.json ./
+2025-Sep-09 15:36:39.247457
+#15 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#16 [base  9/11] COPY components.json ./
+2025-Sep-09 15:36:39.247457
+#16 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#17 [base  6/11] COPY vite.config.ts ./
+2025-Sep-09 15:36:39.247457
+#17 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#18 [base  3/11] WORKDIR /app
+2025-Sep-09 15:36:39.247457
+#18 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#19 [production 4/9] RUN addgroup -g 1001 -S nodejs &&     adduser -S nodejs -u 1001
+2025-Sep-09 15:36:39.247457
+#19 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#20 [production 6/9] COPY --from=base /app/package*.json ./
+2025-Sep-09 15:36:39.247457
+#20 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#21 [dev-deps 1/1] RUN npm ci --ignore-scripts
+2025-Sep-09 15:36:39.247457
+#21 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#22 [build 1/4] COPY client/ ./client/
+2025-Sep-09 15:36:39.247457
+#22 DONE 0.1s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#23 [build 2/4] COPY server/ ./server/
+2025-Sep-09 15:36:39.247457
+#23 DONE 0.0s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#24 [build 3/4] COPY shared/ ./shared/
+2025-Sep-09 15:36:39.247457
+#24 DONE 0.0s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#25 [build 4/4] RUN npm run build
+2025-Sep-09 15:36:39.247457
+#25 0.327
+2025-Sep-09 15:36:39.247457
+#25 0.327 > rest-express@1.0.0 build
+2025-Sep-09 15:36:39.247457
+#25 0.327 > vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-Sep-09 15:36:39.247457
+#25 0.327
+2025-Sep-09 15:36:39.247457
+#25 0.810 vite v5.4.19 building for production...
+2025-Sep-09 15:36:39.247457
+#25 0.926 transforming...
+2025-Sep-09 15:36:39.247457
+#25 1.587 Browserslist: browsers data (caniuse-lite) is 11 months old. Please run:
+2025-Sep-09 15:36:39.247457
+#25 1.587   npx update-browserslist-db@latest
+2025-Sep-09 15:36:39.247457
+#25 1.587   Why you should do it regularly: https://github.com/browserslist/update-db#readme
+2025-Sep-09 15:36:39.247457
+#25 3.828
+2025-Sep-09 15:36:39.247457
+#25 3.828 A PostCSS plugin did not pass the `from` option to `postcss.parse`. This may cause imported assets to be incorrectly transformed. If you've recently added a PostCSS plugin that raised this warning, please contact the package author to fix the issue.
+2025-Sep-09 15:36:39.247457
+#25 11.39 ✓ 1865 modules transformed.
+2025-Sep-09 15:36:39.247457
+#25 12.07 rendering chunks...
+2025-Sep-09 15:36:39.247457
+#25 12.10 computing gzip size...
+2025-Sep-09 15:36:39.247457
+#25 12.13 ../dist/public/index.html                   2.35 kB │ gzip:   0.94 kB
+2025-Sep-09 15:36:39.247457
+#25 12.13 ../dist/public/assets/index-BMVZVofz.css   77.78 kB │ gzip:  12.49 kB
+2025-Sep-09 15:36:39.247457
+#25 12.13 ../dist/public/assets/index-B1UTXj9C.js   642.34 kB │ gzip: 186.81 kB
+2025-Sep-09 15:36:39.247457
+#25 12.13
+2025-Sep-09 15:36:39.247457
+#25 12.13 (!) Some chunks are larger than 500 kB after minification. Consider:
+2025-Sep-09 15:36:39.247457
+#25 12.13 - Using dynamic import() to code-split the application
+2025-Sep-09 15:36:39.247457
+#25 12.13 - Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+2025-Sep-09 15:36:39.247457
+#25 12.13 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+2025-Sep-09 15:36:39.247457
+#25 12.13 ✓ built in 11.27s
+2025-Sep-09 15:36:39.247457
+#25 12.26
+2025-Sep-09 15:36:39.247457
+#25 12.26   dist/index.js  18.2kb
+2025-Sep-09 15:36:39.247457
+#25 12.26
+2025-Sep-09 15:36:39.247457
+#25 12.26 ⚡ Done in 5ms
+2025-Sep-09 15:36:39.247457
+#25 DONE 12.3s
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#26 [production 7/9] COPY --from=build /app/dist ./dist
+2025-Sep-09 15:36:39.247457
+#26 CACHED
+2025-Sep-09 15:36:39.247457
+2025-Sep-09 15:36:39.247457
+#27 [production 8/9] COPY --from=build /app/client/dist ./client/dist
+2025-Sep-09 15:36:39.247457
+#27 ERROR: failed to calculate checksum of ref 31286f1e-53a3-4cb7-8847-c8fe0a302e92::gej0t00104db1fkgdobt00qw6: "/app/client/dist": not found
+2025-Sep-09 15:36:39.247457
+------
+2025-Sep-09 15:36:39.247457
+> [production 8/9] COPY --from=build /app/client/dist ./client/dist:
+2025-Sep-09 15:36:39.247457
+------
+2025-Sep-09 15:36:39.247457
+Dockerfile:56
+2025-Sep-09 15:36:39.247457
+--------------------
+2025-Sep-09 15:36:39.247457
+54 |
+2025-Sep-09 15:36:39.247457
+55 |     # Copiar archivos estáticos del cliente (si existen)
+2025-Sep-09 15:36:39.247457
+56 | >>> COPY --from=build /app/client/dist ./client/dist
+2025-Sep-09 15:36:39.247457
+57 |
+2025-Sep-09 15:36:39.247457
+58 |     # Cambiar propiedad de archivos al usuario nodejs
+2025-Sep-09 15:36:39.247457
+--------------------
+2025-Sep-09 15:36:39.247457
+ERROR: failed to build: failed to solve: failed to compute cache key: failed to calculate checksum of ref 31286f1e-53a3-4cb7-8847-c8fe0a302e92::gej0t00104db1fkgdobt00qw6: "/app/client/dist": not found
+2025-Sep-09 15:36:39.247457
+exit status 1
+2025-Sep-09 15:36:39.252125
+Deployment failed. Removing the new version of your application.
+2025-Sep-09 15:36:39.694258
+Gracefully shutting down build container: zsswgk0owk8wgw4sg8s0ocsk

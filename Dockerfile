@@ -49,11 +49,8 @@ RUN addgroup -g 1001 -S nodejs && \
 COPY --from=base /app/node_modules ./node_modules
 COPY --from=base /app/package*.json ./
 
-# Copiar archivos de build
+# Copiar archivos de build del backend y frontend
 COPY --from=build /app/dist ./dist
-
-# Copiar archivos estáticos del cliente (si existen)
-COPY --from=build /app/client/dist ./client/dist
 
 # Cambiar propiedad de archivos al usuario nodejs
 RUN chown -R nodejs:nodejs /app
