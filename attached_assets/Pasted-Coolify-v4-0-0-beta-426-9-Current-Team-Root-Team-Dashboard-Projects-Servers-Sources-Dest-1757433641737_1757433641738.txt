@@ -1,0 +1,208 @@
+Coolify
+v4.0.0-beta.426
+9+
+Current Team
+
+Root Team
+Dashboard
+Projects
+Servers
+Sources
+Destinations
+S3 Storages
+Shared Variables
+Notifications
+Keys & Tokens
+Tags
+Terminal
+Profile
+Teams
+Settings
+Sponsor us
+Feedback
+Logout
+Deployment
+NootTools
+production
+fulloap/noottools:main-b8k84s84sk0044wwg40cgwwo
+Restarting
+(unhealthy)
+
+Configuration
+Deployments
+Logs
+Terminal
+
+Links
+
+Advanced
+Redeploy
+Restart
+Stop
+Deployment Log
+Show Debug Logs
+Deployment is Failed.
+
+
+
+
+2025-Sep-09 16:00:19.242481
+Starting deployment of fulloap/noottools:main to localhost.
+2025-Sep-09 16:00:19.448572
+Preparing container with helper image: ghcr.io/coollabsio/coolify-helper:1.0.10.
+2025-Sep-09 16:00:22.157171
+----------------------------------------
+2025-Sep-09 16:00:22.161792
+Importing fulloap/noottools:main (commit sha HEAD) to /artifacts/bw08k4scgk4004k0kg04os8g.
+2025-Sep-09 16:00:23.872725
+Image not found (b8k84s84sk0044wwg40cgwwo:4b866da054295026df327ba6c56ac5c8a25438f2). Building new image.
+2025-Sep-09 16:00:25.737178
+----------------------------------------
+2025-Sep-09 16:00:25.741657
+Building docker image started.
+2025-Sep-09 16:00:25.745635
+To check the current progress, click on Show Debug Logs.
+2025-Sep-09 16:00:27.860379
+Oops something is not okay, are you okay? 😢
+2025-Sep-09 16:00:27.865716
+#0 building with "default" instance using docker driver
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#1 [internal] load build definition from Dockerfile
+2025-Sep-09 16:00:27.865716
+#1 transferring dockerfile: 1.75kB done
+2025-Sep-09 16:00:27.865716
+#1 DONE 0.0s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#2 [internal] load metadata for docker.io/library/node:20-alpine
+2025-Sep-09 16:00:27.865716
+#2 DONE 0.6s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#3 [internal] load .dockerignore
+2025-Sep-09 16:00:27.865716
+#3 transferring context: 449B done
+2025-Sep-09 16:00:27.865716
+#3 DONE 0.0s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#4 [base  1/11] FROM docker.io/library/node:20-alpine@sha256:eabac870db94f7342d6c33560d6613f188bbcf4bbe1f4eb47d5e2a08e1a37722
+2025-Sep-09 16:00:27.865716
+#4 DONE 0.0s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#5 [internal] load build context
+2025-Sep-09 16:00:27.865716
+#5 transferring context: 774.28kB 0.0s done
+2025-Sep-09 16:00:27.865716
+#5 DONE 0.1s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#6 [base  2/11] RUN apk add --no-cache python3 make g++ libc6-compat
+2025-Sep-09 16:00:27.865716
+#6 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#7 [dev-deps 1/1] RUN npm ci --ignore-scripts
+2025-Sep-09 16:00:27.865716
+#7 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#8 [base  4/11] COPY package*.json ./
+2025-Sep-09 16:00:27.865716
+#8 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#9 [base  6/11] COPY vite.config.ts ./
+2025-Sep-09 16:00:27.865716
+#9 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#10 [base  9/11] COPY components.json ./
+2025-Sep-09 16:00:27.865716
+#10 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#11 [base  7/11] COPY tailwind.config.ts ./
+2025-Sep-09 16:00:27.865716
+#11 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#12 [base 10/11] COPY drizzle.config.ts ./
+2025-Sep-09 16:00:27.865716
+#12 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#13 [base 11/11] RUN npm ci --only=production --ignore-scripts && npm cache clean --force
+2025-Sep-09 16:00:27.865716
+#13 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#14 [base  5/11] COPY tsconfig.json ./
+2025-Sep-09 16:00:27.865716
+#14 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#15 [base  8/11] COPY postcss.config.js ./
+2025-Sep-09 16:00:27.865716
+#15 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#16 [base  3/11] WORKDIR /app
+2025-Sep-09 16:00:27.865716
+#16 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#17 [build 1/4] COPY client/ ./client/
+2025-Sep-09 16:00:27.865716
+#17 CACHED
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#18 [build 2/4] COPY server/ ./server/
+2025-Sep-09 16:00:27.865716
+#18 DONE 0.1s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#19 [build 3/4] COPY shared/ ./shared/
+2025-Sep-09 16:00:27.865716
+#19 DONE 0.0s
+2025-Sep-09 16:00:27.865716
+2025-Sep-09 16:00:27.865716
+#20 [build 4/4] RUN vite build && esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-Sep-09 16:00:27.865716
+#20 0.114 /bin/sh: vite: not found
+2025-Sep-09 16:00:27.865716
+#20 ERROR: process "/bin/sh -c vite build && esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist" did not complete successfully: exit code: 127
+2025-Sep-09 16:00:27.865716
+------
+2025-Sep-09 16:00:27.865716
+> [build 4/4] RUN vite build && esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist:
+2025-Sep-09 16:00:27.865716
+0.114 /bin/sh: vite: not found
+2025-Sep-09 16:00:27.865716
+------
+2025-Sep-09 16:00:27.865716
+Dockerfile:34
+2025-Sep-09 16:00:27.865716
+--------------------
+2025-Sep-09 16:00:27.865716
+32 |
+2025-Sep-09 16:00:27.865716
+33 |     # Build del frontend y backend de producción
+2025-Sep-09 16:00:27.865716
+34 | >>> RUN vite build && esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+2025-Sep-09 16:00:27.865716
+35 |
+2025-Sep-09 16:00:27.865716
+36 |     # Etapa de producción
+2025-Sep-09 16:00:27.865716
+--------------------
+2025-Sep-09 16:00:27.865716
+ERROR: failed to build: failed to solve: process "/bin/sh -c vite build && esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist" did not complete successfully: exit code: 127
+2025-Sep-09 16:00:27.865716
+exit status 1
+2025-Sep-09 16:00:27.871064
+Deployment failed. Removing the new version of your application.
+2025-Sep-09 16:00:28.391338
+Gracefully shutting down build container: bw08k4scgk4004k0kg04os8g
