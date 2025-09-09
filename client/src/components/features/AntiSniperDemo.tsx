@@ -1,10 +1,10 @@
 import { Card } from "@/components/ui/card";
-import { useAntiSniperCountdown } from "@/hooks/useRealTimeData";
 import { Shield, X, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export function AntiSniperProtection() {
-  const { timeLeft, formattedTime, isActive, isExpired } = useAntiSniperCountdown(28);
+  // Static 30-second protection display (no countdown)
+  const isActive = true; // Always show as active protection
+  const protectionTime = "00:30";
 
   return (
     <section className="mb-16">
@@ -20,29 +20,18 @@ export function AntiSniperProtection() {
         </div>
         
         <div className="max-w-4xl mx-auto">
-          {/* Countdown Timer */}
+          {/* Protection Display */}
           <div className="text-center mb-8">
-            <div className={cn(
-              "inline-flex items-center space-x-4 p-6 rounded-xl border transition-all duration-500",
-              isActive 
-                ? "bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/30" 
-                : "bg-gradient-to-r from-green-500/20 to-blue-500/20 border-green-500/30"
-            )}>
-              <div className={cn(
-                "text-6xl font-bold tabular-nums transition-colors duration-500",
-                isActive ? "text-red-400" : "text-green-400"
-              )} data-testid="text-countdown">
-                {formattedTime}
+            <div className="inline-flex items-center space-x-4 p-6 rounded-xl border bg-gradient-to-r from-red-500/20 to-orange-500/20 border-red-500/30">
+              <div className="text-6xl font-bold tabular-nums text-red-400" data-testid="text-countdown">
+                {protectionTime}
               </div>
               <div className="text-left">
-                <div className={cn(
-                  "text-xl font-bold transition-colors duration-500",
-                  isActive ? "text-red-400" : "text-green-400"
-                )} data-testid="text-protection-status">
-                  {isActive ? "Protección Activa" : "Protección Desactivada"}
+                <div className="text-xl font-bold text-red-400" data-testid="text-protection-status">
+                  Protección Activa
                 </div>
                 <div className="text-muted-foreground" data-testid="text-protection-description">
-                  {isActive ? "Swaps AMM bloqueados" : "Swaps AMM permitidos"}
+                  Swaps AMM bloqueados durante 30 segundos
                 </div>
               </div>
             </div>
@@ -50,31 +39,14 @@ export function AntiSniperProtection() {
           
           {/* Transaction Examples */}
           <div className="grid md:grid-cols-2 gap-6">
-            <Card className={cn(
-              "p-6 border transition-all duration-500",
-              isActive 
-                ? "bg-red-500/10 border-red-500/30" 
-                : "bg-muted/20 border-border"
-            )}>
+            <Card className="p-6 border bg-red-500/10 border-red-500/30">
               <div className="flex items-center space-x-3 mb-4">
-                <div className={cn(
-                  "w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-500",
-                  isActive 
-                    ? "bg-red-500/20" 
-                    : "bg-muted"
-                )}>
-                  {isActive ? (
-                    <X className="w-5 h-5 text-red-400" />
-                  ) : (
-                    <Check className="w-5 h-5 text-muted-foreground" />
-                  )}
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-red-500/20">
+                  <X className="w-5 h-5 text-red-400" />
                 </div>
                 <div>
-                  <div className={cn(
-                    "font-bold transition-colors duration-500",
-                    isActive ? "text-red-400" : "text-muted-foreground"
-                  )} data-testid="text-swap-status">
-                    {isActive ? "Swap Bloqueado" : "Swap Permitido"}
+                  <div className="font-bold text-red-400" data-testid="text-swap-status">
+                    Swap Bloqueado
                   </div>
                   <div className="text-sm text-muted-foreground">AMM Vault → Usuario</div>
                 </div>
@@ -82,7 +54,7 @@ export function AntiSniperProtection() {
               <div className="text-sm text-muted-foreground space-y-1" data-testid="text-blocked-transaction">
                 <p>• Usuario intenta comprar desde Raydium</p>
                 <p>• TransferHook detecta bóveda AMM</p>
-                <p>• Transacción {isActive ? "rechazada" : "permitida"} automáticamente</p>
+                <p>• Transacción rechazada automáticamente</p>
               </div>
             </Card>
             
