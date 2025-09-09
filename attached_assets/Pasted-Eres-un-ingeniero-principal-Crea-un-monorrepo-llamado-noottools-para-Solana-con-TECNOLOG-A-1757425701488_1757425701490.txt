@@ -1,0 +1,189 @@
+Eres un ingeniero principal. Crea un monorrepo llamado `noottools` para Solana con:
+
+## TECNOLOGÍAS
+- On-chain: Rust + Anchor (última versión estable).
+- Frontend: Next.js 14 + TypeScript + Tailwind + Solana Wallet Adapter (Phantom, Solflare, Backpack), Raydium/Orca SDK, Jupiter swap (router v4/v6).
+- Backend sin estado: Next.js API Routes (no firma, no almacena llaves).
+- Oráculos: Pyth (precios) y Switchboard (holders y volumen USD).
+- Tests: `anchor test` (Rust) + `vitest`/`jest` para TS.
+- Linter/format: `eslint`, `prettier`, `cargo fmt`, `cargo clippy`.
+- Licencia: MIT.
+
+## ARBOL DE DIRECTORIOS
+noottools/
+  README.md
+  .tooling/
+    setup-replit.md
+    install.sh               # script para instalar Rust, Solana CLI, Anchor en Replit
+  contracts/
+    Anchor.toml
+    programs/
+      registry_escrow/
+        Cargo.toml
+        src/lib.rs
+      burn_router/
+        Cargo.toml
+        src/lib.rs
+      guard_hook/
+        Cargo.toml
+        src/lib.rs
+    tests/
+      registry_escrow.spec.ts
+      burn_router.spec.ts
+      guard_hook.spec.ts
+  apps/
+    frontend/
+      package.json
+      next.config.mjs
+      src/
+        app/
+          layout.tsx
+          page.tsx
+          crear-token/page.tsx
+          crear-pool/page.tsx
+          migrar-liquidez/page.tsx
+          estado/page.tsx
+        components/
+          WalletProvider.tsx
+          TxBuilder.ts
+          JupiterBuyAndBurnButton.tsx
+          EscrowStatus.tsx
+          AntiSniperPanel.tsx
+        lib/
+          solana.ts
+          raydium.ts
+          orca.ts
+          jupiter.ts
+          pyth.ts
+          switchboard.ts
+        styles/globals.css
+      .env.example
+    backend/
+      package.json
+      src/pages/api/templates/raydium.ts
+      src/pages/api/templates/orca.ts
+      src/pages/api/health.ts
+  scripts/
+    deploy-devnet.ts
+    set-oracles.ts
+    sample-route-jupiter.ts
+  .github/
+    workflows/ci.yml
+
+## REQUISITOS FUNCIONALES (RESUMEN)
+1) Crear **pools preconfigurados** (Raydium/Orca) firmados solo por el usuario.
+2) **Bloquear 60%** de tokens LP en un **Escrow on-chain** hasta:
+   - holders únicos ≥ 500 (Switchboard feed)
+   - volumen USD agregado ≥ 25,000 (Switchboard + Pyth)
+3) **Anti-sniper 30 s** tras lanzamiento: SPL Token-2022 con **TransferHook** (guard_hook) bloquea swaps que toquen **bóvedas de AMM**; permite wallet→wallet. Whitelist opcional para que el creador añada liquidez.
+4) **Buy-and-burn automático**:
+   - **5% de liquidez migrada** se deposita al **burn_router**
+   - **todas las comisiones** de los **pares nuevos** van al burn_router
+   - burn_router hace swap vía **Jupiter** (SOL/USDC → $NOOT) y envía $NOOT a **BURN_ADDRESS**
+5) **Sin custodia / sin fees de creación**: todas las transacciones se construyen sin firmar en el frontend y se firman en la wallet del usuario. Backend solo sirve plantillas JSON.
+
+## PROGRAMAS ANCHOR (DETALLE)
+
+### A) registry_escrow
+- Propósito: registrar pools y custodiar el **60% LP** en una **ATA del PDA** (escrow).
+- Cuentas/PDAs:
+  - `GlobalStatePDA` con: tesoro/multisig (destino final de LP), feeds de oráculo (holders, volumen, precios), mint de $NOOT (para referencia).
+  - `PoolStatePDA` por pool: mints, cuentas AMM, porcentaje bloqueado, estado (locked/unlocked), totals.
+  - `EscrowVault` (ATA LP a nombre del PDA).
+- Instrucciones:
+  - `init_global(treasury, holders_feed, volume_feed, pyth_price_feeds, noot_mint)`
+  - `register_pool(params...)`  // guarda cuentas Raydium/Orca y mints
+  - `deposit_lp(amount)`        // recibe 60% LP al EscrowVault
+  - `unlock()`                  // valida holders ≥ 500 y volumenUSD ≥ 25k con Switchboard+Pyth y transfiere LP al `treasury`
+- Eventos: `LPDeposited`, `PoolRegistered`, `Unlocked`.
+- Seguridad: `#[account(owner = ...)]` y constraints estrictos; sin upgrade o con multisig+timelock (comentar en README).
+
+### B) burn_router
+- Propósito: recibir **5% migrado** y **fees de trading** y ejecutar **buy-and-burn**.
+- Cuentas/PDAs:
+  - `RouterStatePDA`: `burn_address`, vaults de comisiones (ATAs), mints admitidos.
+  - `FeeVault<token>`: ATAs que reciben comisiones y 5% migrado.
+- Instrucciones:
+  - `init_router(burn_address, allowed_mints[])`
+  - `deposit_fees(mint, amount)`  // entrada permissionless de comisiones/5%
+  - `buy_and_burn(route_accounts[])`
+    - CPI al **Jupiter Router**. Las `remaining_accounts` contienen la ruta precomputada off-chain.
+    - Convierte SOL/USDC → $NOOT y envía a `burn_address`.
+- Eventos: `FeesDeposited`, `BoughtAndBurned`.
+- Seguridad: chequear mints permitidos; no custodiar llaves.
+
+### C) guard_hook (TransferHook – Token-2022)
+- Propósito: **anti-sniper 30 s**.
+- Config:
+  - `HookConfigPDA`: `launch_ts`, `amm_vaults[]`, `whitelist[]`.
+- Lógica (pseudocódigo en `lib.rs`):
+  - `now = Clock::get()?.unix_timestamp`
+  - `if now < launch_ts + 30` y (`src` ∈ `amm_vaults` o `dst` ∈ `amm_vaults`) y (signer no está en `whitelist`) → **revertir**.
+  - Permitir wallet→wallet.
+- Instrucciones:
+  - `init_hook_config(mint, launch_ts, amm_vaults[], whitelist[])`
+  - `update_whitelist(add/remove)`
+- Eventos: `GuardConfigured`, `GuardUpdated`.
+
+## FRONTEND (Next.js + TS)
+Páginas y funciones:
+- `/crear-token`: crea SPL Token-2022 con **TransferHook** apuntando a `guard_hook` (no firmar en servidor).
+- `/crear-pool`: usa `/api/templates/{raydium|orca}` (backend) para cargar plantillas; construye tx para crear pool y configurar cuentas de **fees** a los vaults del **burn_router**; asegura que el **60% de LP** vaya a `registry_escrow`.
+- `/migrar-liquidez`: asistente que envía **5%** al `burn_router`.
+- `/estado`: muestra holders y volumen desde **Switchboard**, precios desde **Pyth**; botones **permissionless** para `unlock()` y `buy_and_burn()`.
+- Componentes: `WalletProvider`, `JupiterBuyAndBurnButton`, `EscrowStatus`, `AntiSniperPanel`.
+- Estilo: Tailwind, diseño limpio, dark/light.
+
+## BACKEND (sin estado)
+- `/api/templates/raydium`: devuelve JSON de parámetros válidos para crear pool Raydium (versiones, slippage por defecto, cuentas necesarias).
+- `/api/templates/orca`: igual para Orca.
+- `/api/health`: ok.
+- Importante: **no firma ni guarda** llaves. Solo plantillas.
+
+## ORÁCULOS
+- `set-oracles.ts`: script para registrar feeds:
+  - Switchboard: `holders_feed` (entero ≥ 500), `volume_usd_feed` (≥ 25_000).
+  - Pyth: precios de SOL, USDC, NOOT.
+- `pyth.ts` y `switchboard.ts`: helpers para leer valores on-chain.
+
+## RAYDIUM/ORCA/JUPITER
+- `raydium.ts` y `orca.ts`: helpers para construir tx de creación de pools y vincular cuentas de comisión a `burn_router`.
+- `jupiter.ts`: helper para construir rutas multi-hop y empaquetarlas en `remaining_accounts` para el CPI del `burn_router`.
+
+## SCRIPTS
+- `scripts/deploy-devnet.ts`: compila y despliega los 3 programas Anchor, inicializa `GlobalStatePDA` y `RouterStatePDA`.
+- `scripts/set-oracles.ts`: registra/actualiza feeds.
+- `scripts/sample-route-jupiter.ts`: ejemplo de cómo preparar `remaining_accounts` para `buy_and_burn()`.
+
+## TESTS
+- `contracts/tests/*.spec.ts`:
+  - registry_escrow: lock del 60%, `unlock()` falla antes de umbrales y pasa al simular holders≥500 y volumen≥25k.
+  - burn_router: `deposit_fees()` y `buy_and_burn()` (mock de ruta).
+  - guard_hook: bloquea durante 30 s las transferencias con bóvedas AMM y permite wallet→wallet.
+
+## .ENV EJEMPLO (apps/frontend/.env.example)
+NEXT_PUBLIC_SOLANA_RPC=https://api.devnet.solana.com
+NEXT_PUBLIC_PYTH_PRICE_FEEDS=...
+NEXT_PUBLIC_SWITCHBOARD_FEED_HOLDERS=...
+NEXT_PUBLIC_SWITCHBOARD_FEED_VOLUME=...
+NEXT_PUBLIC_NOOT_MINT=...
+NEXT_PUBLIC_BURN_ADDRESS=...
+NEXT_PUBLIC_PROGRAM_ID_REGISTRY=...
+NEXT_PUBLIC_PROGRAM_ID_BURN_ROUTER=...
+NEXT_PUBLIC_PROGRAM_ID_GUARD_HOOK=...
+NEXT_PUBLIC_JUPITER_PROGRAM=...
+
+## README
+Explica:
+- Instalación en Replit: ejecutar `.tooling/install.sh` (instala Rust, Solana CLI, Anchor).
+- `anchor build && anchor deploy` a devnet.
+- Arranque del frontend/backend con `pnpm dev`.
+- Advertencias de seguridad: no subir llaves, todo client-side, código open-source, sin custodia ni fees de creación.
+
+## ACEPTACIÓN (CRITERIOS)
+- Crear token 2022 con TransferHook funcional.
+- Pools Raydium/Orca creados por usuario, con 60% LP enviado a `registry_escrow`.
+- Anti-sniper bloquea swaps en bóvedas durante 30 s y permite wallet→wallet.
+- `buy_and_burn()` convierte SOL/USDC→$NOOT por Jupiter y quema en `BURN_ADDRESS`.
+- `unlock()` transfiere LP al `treasury` al cumplir umbrales publicados por Switchboard+Pyth.
+- Sin firmas en servidor; backend solo sirve plantillas JSON.
