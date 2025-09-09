@@ -1,6 +1,7 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { log } from "./logger";
+import { serveStatic } from "./production";
 
 const app = express();
 app.use(express.json());
@@ -47,20 +48,11 @@ app.use((req, res, next) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    const { setupVite } = await import("./vite");
-    await setupVite(app, server);
-  } else {
-    const { serveStatic } = await import("./production");
-    serveStatic(app);
-  }
+  // Only serve static files in production
+  serveStatic(app);
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Default to 3016 for Coolify deployment
-  // this serves both the API and the client.
   const port = parseInt(process.env.PORT || '3016', 10);
   server.listen({
     port,
