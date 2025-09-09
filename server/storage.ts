@@ -58,7 +58,7 @@ export class MemStorage implements IStorage {
       id: randomUUID(),
       ...tokenData,
       decimals: tokenData.decimals ?? 9,
-      mintAddress: tokenData.mintAddress || null,
+      mintAddress: null,
       createdAt: new Date()
     };
     
@@ -75,7 +75,7 @@ export class MemStorage implements IStorage {
   }
 
   async getTokenByMint(mintAddress: string): Promise<Token | undefined> {
-    for (const token of this.tokens.values()) {
+    for (const token of Array.from(this.tokens.values())) {
       if (token.mintAddress === mintAddress) {
         return token;
       }
@@ -84,32 +84,34 @@ export class MemStorage implements IStorage {
   }
 
   // Pool operations
-  async createPool(poolData: InsertPool): Promise<SelectPool> {
-    const pool: SelectPool = {
-      id: (this.nextId++).toString(),
+  async createPool(poolData: InsertPool): Promise<Pool> {
+    const pool: Pool = {
+      id: randomUUID(),
       ...poolData,
-      createdAt: new Date(),
-      updatedAt: new Date()
+      poolAddress: null,
+      createdAt: new Date()
     };
     
     this.pools.set(pool.id, pool);
     return pool;
   }
 
-  async getPoolsByToken(tokenId: string): Promise<SelectPool[]> {
+  async getPoolsByToken(tokenId: string): Promise<Pool[]> {
     return Array.from(this.pools.values()).filter(pool => pool.tokenId === tokenId);
   }
 
-  async getPool(id: string): Promise<SelectPool | null> {
-    return this.pools.get(id) || null;
+  async getPool(id: string): Promise<Pool | undefined> {
+    return this.pools.get(id);
   }
 
   // Escrow operations
-  async createEscrow(escrowData: InsertEscrow): Promise<SelectEscrow> {
-    const escrow: SelectEscrow = {
-      id: (this.nextId++).toString(),
+  async createEscrow(escrowData: InsertEscrow): Promise<Escrow> {
+    const escrow: Escrow = {
+      id: randomUUID(),
       ...escrowData,
-      createdAt: new Date(),
+      isUnlocked: false,
+      holdersCount: 0,
+      volumeUsd: "0",
       updatedAt: new Date()
     };
     
@@ -117,32 +119,28 @@ export class MemStorage implements IStorage {
     return escrow;
   }
 
-  async getEscrow(poolId: string): Promise<SelectEscrow | null> {
-    return this.escrows.get(poolId) || null;
+  async getEscrow(poolId: string): Promise<Escrow | undefined> {
+    return this.escrows.get(poolId);
   }
 
-  async updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: number): Promise<SelectEscrow | null> {
+  async updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: number): Promise<Escrow | undefined> {
     const escrow = this.escrows.get(poolId);
-    if (!escrow) return null;
+    if (!escrow) return undefined;
 
-    const updatedEscrow: SelectEscrow = {
-      ...escrow,
-      currentHolders: holdersCount,
-      currentVolume: volumeUsd,
-      isReleased: holdersCount >= 500 && volumeUsd >= 25000,
-      releaseDate: (holdersCount >= 500 && volumeUsd >= 25000) ? new Date() : null,
-      updatedAt: new Date()
-    };
+    escrow.holdersCount = holdersCount;
+    escrow.volumeUsd = volumeUsd.toString();
+    escrow.isUnlocked = holdersCount >= 500 && volumeUsd >= 25000;
+    escrow.updatedAt = new Date();
 
-    this.escrows.set(poolId, updatedEscrow);
-    return updatedEscrow;
+    return escrow;
   }
 
   // Burn event operations
-  async createBurnEvent(burnEventData: InsertBurnEvent): Promise<SelectBurnEvent> {
-    const burnEvent: SelectBurnEvent = {
-      id: (this.nextId++).toString(),
+  async createBurnEvent(burnEventData: InsertBurnEvent): Promise<BurnEvent> {
+    const burnEvent: BurnEvent = {
+      id: randomUUID(),
       ...burnEventData,
+      txSignature: null,
       createdAt: new Date()
     };
     
@@ -150,9 +148,9 @@ export class MemStorage implements IStorage {
     return burnEvent;
   }
 
-  async getBurnEvents(limit: number = 10): Promise<SelectBurnEvent[]> {
+  async getBurnEvents(limit: number = 10): Promise<BurnEvent[]> {
     return this.burnEvents
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .sort((a, b) => (b.createdAt?.getTime() || 0) - (a.createdAt?.getTime() || 0))
       .slice(0, limit);
   }
 
@@ -172,7 +170,7 @@ export class MemStorage implements IStorage {
     const burnEvents = this.burnEvents;
 
     const totalLiquidityLocked = escrows.reduce((sum, escrow) => 
-      sum + parseFloat(escrow.lockedAmount || "0"), 0
+      sum + parseFloat(escrow.lockedLpAmount || "0"), 0
     );
 
     const totalBurned = burnEvents.reduce((sum, event) => 
@@ -180,11 +178,11 @@ export class MemStorage implements IStorage {
     );
 
     const totalVolume = escrows.reduce((sum, escrow) => 
-      sum + parseFloat(escrow.currentVolume?.toString() || "0"), 0
+      sum + parseFloat(escrow.volumeUsd || "0"), 0
     );
 
     const averageHolders = escrows.length > 0 
-      ? escrows.reduce((sum, escrow) => sum + (escrow.currentHolders || 0), 0) / escrows.length
+      ? escrows.reduce((sum, escrow) => sum + (escrow.holdersCount || 0), 0) / escrows.length
       : 0;
 
     return {

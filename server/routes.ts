@@ -1,14 +1,14 @@
-import express from "express";
-import { z } from "zod";
-import type { Database } from "./db";
-import { insertTokenSchema, insertPoolSchema, insertBurnEventSchema } from "@shared/schema";
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { insertTokenSchema, insertPoolSchema, insertEscrowSchema, insertBurnEventSchema } from "@shared/schema";
 import { Connection, PublicKey } from '@solana/web3.js';
 import { TOKEN_PROGRAM_ID } from '@solana/spl-token';
 
 // Real Solana connection for backend data fetching
 const solanaConnection = new Connection('https://api.devnet.solana.com', 'confirmed');
 
-export function registerRoutes(app: express.Application, db: Database) {
+export async function registerRoutes(app: Express): Promise<Server> {
   // Get real global statistics from Solana blockchain
   app.get("/api/stats", async (req, res) => {
     try {
@@ -98,7 +98,7 @@ export function registerRoutes(app: express.Application, db: Database) {
       }
 
       // Store token info in database for tracking
-      const result = await db.insertToken(tokenData);
+      const result = await storage.createToken(tokenData);
       
       res.json(result);
     } catch (error) {
@@ -133,7 +133,7 @@ export function registerRoutes(app: express.Application, db: Database) {
       }
 
       // Store pool info for tracking
-      const result = await db.insertPool(poolData);
+      const result = await storage.createPool(poolData);
       
       res.json(result);
     } catch (error) {
@@ -166,7 +166,7 @@ export function registerRoutes(app: express.Application, db: Database) {
       }
 
       // Store burn event for tracking
-      const result = await db.insertBurnEvent(burnData);
+      const result = await storage.createBurnEvent(burnData);
       
       res.json(result);
     } catch (error) {
@@ -181,7 +181,8 @@ export function registerRoutes(app: express.Application, db: Database) {
   // Get real burn events from database
   app.get("/api/burn-events", async (req, res) => {
     try {
-      const burnEvents = await db.getBurnEvents();
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const burnEvents = await storage.getBurnEvents(limit);
       res.json(burnEvents);
     } catch (error) {
       console.error('Error fetching burn events:', error);
@@ -246,7 +247,7 @@ export function registerRoutes(app: express.Application, db: Database) {
       }
 
       // Get token from database
-      const token = await db.getTokenByMint(mintAddress);
+      const token = await storage.getTokenByMint(mintAddress);
       if (!token) {
         return res.status(404).json({ error: 'Token not found in database' });
       }
@@ -255,6 +256,17 @@ export function registerRoutes(app: express.Application, db: Database) {
     } catch (error) {
       console.error('Error fetching token:', error);
       res.status(500).json({ error: 'Failed to fetch token information' });
+    }
+  });
+
+  // Stats route
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      res.status(500).json({ error: 'Failed to fetch statistics' });
     }
   });
 
@@ -267,4 +279,7 @@ export function registerRoutes(app: express.Application, db: Database) {
       solanaEndpoint: "https://api.devnet.solana.com"
     });
   });
+
+  const httpServer = createServer(app);
+  return httpServer;
 }
