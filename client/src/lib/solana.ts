@@ -96,7 +96,7 @@ export class SolanaService {
     try {
       // Request connection permission from user
       console.log('Requesting Phantom wallet connection...');
-      const response = await window.solana.connect({ onlyIfTrusted: false });
+      const response = await window.solana.connect();
       
       if (!response || !response.publicKey) {
         throw new Error('Failed to get wallet public key. Please try connecting again.');

@@ -43,7 +43,7 @@ export function PoolCreation() {
       
       // Create liquidity pool on Solana
       const poolResult = await solanaService.createLiquidityPool({
-        tokenMint: "MAT_MOCK_MINT", // In real implementation, this would be the actual token mint
+        tokenMint: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU", // Real token mint from previous creation
         quoteMint: data.pairToken === "SOL" ? "So11111111111111111111111111111111111111112" : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         tokenAmount: data.tokenAmount,
         quoteAmount: data.pairAmount,

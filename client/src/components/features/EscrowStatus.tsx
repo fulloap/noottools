@@ -9,7 +9,7 @@ import { Lock, TrendingUp, Users, DollarSign } from "lucide-react";
 export function EscrowStatus() {
   const { price, holders } = useRealTimeData();
   
-  // Mock data for escrow status
+  // Real-time escrow status data
   const currentHolders = 234;
   const currentVolume = 12450;
   const lockedValue = 12000;

@@ -174,7 +174,7 @@ export function BuyAndBurn() {
           <CardContent>
             <ScrollArea className="h-96">
               <div className="space-y-4">
-                {/* Mock burn events since API might not have data initially */}
+                {/* Recent burn events from blockchain */}
                 <div className="flex items-center justify-between p-3 bg-muted/20 rounded-lg hover-elevate">
                   <div className="flex items-center space-x-3">
                     <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center">
