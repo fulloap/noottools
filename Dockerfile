@@ -30,8 +30,8 @@ COPY client/ ./client/
 COPY server/ ./server/
 COPY shared/ ./shared/
 
-# Build del frontend y backend de producción
-RUN npx vite build && npx esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+# Build del frontend y backend de producción  
+RUN npx vite build && npx esbuild server/index.prod.ts --platform=node --packages=external --bundle --format=esm --outdir=dist && mv dist/index.prod.js dist/index.js
 
 # Etapa de producción
 FROM node:20-alpine AS production
