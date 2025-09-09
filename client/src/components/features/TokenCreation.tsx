@@ -43,7 +43,9 @@ export function TokenCreation() {
         name: data.name,
         symbol: data.symbol,
         decimals: data.decimals,
-        totalSupply: data.totalSupply
+        totalSupply: data.totalSupply,
+        antiSniperEnabled: true,
+        transferHookEnabled: true
       });
       
       // Also save to backend for tracking

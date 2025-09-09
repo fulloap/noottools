@@ -3,7 +3,6 @@ import {
   type Pool, 
   type Escrow, 
   type BurnEvent, 
-  type Stats,
   type InsertToken, 
   type InsertPool, 
   type InsertEscrow, 
@@ -16,6 +15,7 @@ export interface IStorage {
   createToken(token: InsertToken): Promise<Token>;
   getToken(id: string): Promise<Token | undefined>;
   getTokens(): Promise<Token[]>;
+  getTokenByMint(mintAddress: string): Promise<Token | undefined>;
 
   // Pool operations
   createPool(pool: InsertPool): Promise<Pool>;
@@ -25,153 +25,183 @@ export interface IStorage {
   // Escrow operations
   createEscrow(escrow: InsertEscrow): Promise<Escrow>;
   getEscrow(poolId: string): Promise<Escrow | undefined>;
-  updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: string): Promise<Escrow | undefined>;
+  updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: number): Promise<Escrow | undefined>;
 
   // Burn event operations
   createBurnEvent(burnEvent: InsertBurnEvent): Promise<BurnEvent>;
   getBurnEvents(limit?: number): Promise<BurnEvent[]>;
 
   // Stats operations
-  getStats(): Promise<Stats>;
-  updateStats(): Promise<Stats>;
+  getStats(): Promise<{
+    id: string;
+    totalTokensCreated: number;
+    totalVolumeUSD: number;
+    totalLiquidityLocked: number;
+    totalBurned: number;
+    averageHolders: number;
+  }>;
+  updateStats(): Promise<any>;
 }
 
+// In-memory storage implementation for development
+// In production, this would be replaced with database-backed storage
 export class MemStorage implements IStorage {
-  private tokens: Map<string, Token>;
-  private pools: Map<string, Pool>;
-  private escrows: Map<string, Escrow>;
-  private burnEvents: Map<string, BurnEvent>;
-  private stats: Stats;
+  private tokens: Map<string, Token> = new Map();
+  private pools: Map<string, Pool> = new Map();
+  private escrows: Map<string, Escrow> = new Map();
+  private burnEvents: BurnEvent[] = [];
+  private nextId = 1;
 
-  constructor() {
-    this.tokens = new Map();
-    this.pools = new Map();
-    this.escrows = new Map();
-    this.burnEvents = new Map();
-    this.stats = {
-      id: "global",
-      totalTokensCreated: 124,
-      totalVolume: "2100000",
-      totalBurned: "89234",
-      totalHolders: 1200,
-      updatedAt: new Date(),
+  // Token operations
+  async createToken(tokenData: InsertToken): Promise<Token> {
+    const token: Token = {
+      id: randomUUID(),
+      ...tokenData,
+      decimals: tokenData.decimals ?? 9,
+      mintAddress: tokenData.mintAddress || null,
+      createdAt: new Date()
     };
-  }
-
-  async createToken(insertToken: InsertToken): Promise<Token> {
-    const id = randomUUID();
-    const token: Token = { 
-      ...insertToken, 
-      id, 
-      decimals: insertToken.decimals ?? 9,
-      mintAddress: null,
-      createdAt: new Date() 
-    };
-    this.tokens.set(id, token);
     
-    // Update stats
-    this.stats.totalTokensCreated += 1;
-    this.stats.updatedAt = new Date();
-    
+    this.tokens.set(token.id, token);
     return token;
-  }
-
-  async getToken(id: string): Promise<Token | undefined> {
-    return this.tokens.get(id);
   }
 
   async getTokens(): Promise<Token[]> {
     return Array.from(this.tokens.values());
   }
 
-  async createPool(insertPool: InsertPool): Promise<Pool> {
-    const id = randomUUID();
-    const pool: Pool = { 
-      ...insertPool, 
-      id, 
-      poolAddress: null,
-      createdAt: new Date() 
+  async getToken(id: string): Promise<Token | undefined> {
+    return this.tokens.get(id);
+  }
+
+  async getTokenByMint(mintAddress: string): Promise<Token | undefined> {
+    for (const token of this.tokens.values()) {
+      if (token.mintAddress === mintAddress) {
+        return token;
+      }
+    }
+    return undefined;
+  }
+
+  // Pool operations
+  async createPool(poolData: InsertPool): Promise<SelectPool> {
+    const pool: SelectPool = {
+      id: (this.nextId++).toString(),
+      ...poolData,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
-    this.pools.set(id, pool);
+    
+    this.pools.set(pool.id, pool);
     return pool;
   }
 
-  async getPool(id: string): Promise<Pool | undefined> {
-    return this.pools.get(id);
-  }
-
-  async getPoolsByToken(tokenId: string): Promise<Pool[]> {
+  async getPoolsByToken(tokenId: string): Promise<SelectPool[]> {
     return Array.from(this.pools.values()).filter(pool => pool.tokenId === tokenId);
   }
 
-  async createEscrow(insertEscrow: InsertEscrow): Promise<Escrow> {
-    const id = randomUUID();
-    const escrow: Escrow = { 
-      ...insertEscrow, 
-      id, 
-      isUnlocked: false,
-      holdersCount: 234,
-      volumeUsd: "12450",
-      updatedAt: new Date() 
+  async getPool(id: string): Promise<SelectPool | null> {
+    return this.pools.get(id) || null;
+  }
+
+  // Escrow operations
+  async createEscrow(escrowData: InsertEscrow): Promise<SelectEscrow> {
+    const escrow: SelectEscrow = {
+      id: (this.nextId++).toString(),
+      ...escrowData,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
-    this.escrows.set(insertEscrow.poolId, escrow);
+    
+    this.escrows.set(escrow.poolId, escrow);
     return escrow;
   }
 
-  async getEscrow(poolId: string): Promise<Escrow | undefined> {
-    return this.escrows.get(poolId);
+  async getEscrow(poolId: string): Promise<SelectEscrow | null> {
+    return this.escrows.get(poolId) || null;
   }
 
-  async updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: string): Promise<Escrow | undefined> {
+  async updateEscrowStatus(poolId: string, holdersCount: number, volumeUsd: number): Promise<SelectEscrow | null> {
     const escrow = this.escrows.get(poolId);
-    if (!escrow) return undefined;
-    
-    escrow.holdersCount = holdersCount;
-    escrow.volumeUsd = volumeUsd;
-    escrow.isUnlocked = holdersCount >= 500 && parseFloat(volumeUsd) >= 25000;
-    escrow.updatedAt = new Date();
-    
-    return escrow;
+    if (!escrow) return null;
+
+    const updatedEscrow: SelectEscrow = {
+      ...escrow,
+      currentHolders: holdersCount,
+      currentVolume: volumeUsd,
+      isReleased: holdersCount >= 500 && volumeUsd >= 25000,
+      releaseDate: (holdersCount >= 500 && volumeUsd >= 25000) ? new Date() : null,
+      updatedAt: new Date()
+    };
+
+    this.escrows.set(poolId, updatedEscrow);
+    return updatedEscrow;
   }
 
-  async createBurnEvent(insertBurnEvent: InsertBurnEvent): Promise<BurnEvent> {
-    const id = randomUUID();
-    const burnEvent: BurnEvent = { 
-      ...insertBurnEvent, 
-      id, 
-      txSignature: null,
-      createdAt: new Date() 
+  // Burn event operations
+  async createBurnEvent(burnEventData: InsertBurnEvent): Promise<SelectBurnEvent> {
+    const burnEvent: SelectBurnEvent = {
+      id: (this.nextId++).toString(),
+      ...burnEventData,
+      createdAt: new Date()
     };
-    this.burnEvents.set(id, burnEvent);
     
-    // Update total burned in stats
-    const currentBurned = parseInt(this.stats.totalBurned || "0");
-    const newBurned = parseInt(insertBurnEvent.amount);
-    this.stats.totalBurned = (currentBurned + newBurned).toString();
-    this.stats.updatedAt = new Date();
-    
+    this.burnEvents.push(burnEvent);
     return burnEvent;
   }
 
-  async getBurnEvents(limit = 10): Promise<BurnEvent[]> {
-    const events = Array.from(this.burnEvents.values())
-      .sort((a, b) => b.createdAt!.getTime() - a.createdAt!.getTime())
+  async getBurnEvents(limit: number = 10): Promise<SelectBurnEvent[]> {
+    return this.burnEvents
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
-    return events;
   }
 
-  async getStats(): Promise<Stats> {
-    return this.stats;
+  // Real statistics based on stored data
+  async getStats(): Promise<{
+    id: string;
+    totalTokensCreated: number;
+    totalVolumeUSD: number;
+    totalLiquidityLocked: number;
+    totalBurned: number;
+    averageHolders: number;
+  }> {
+    // Calculate real statistics from stored data
+    const tokens = Array.from(this.tokens.values());
+    const pools = Array.from(this.pools.values());
+    const escrows = Array.from(this.escrows.values());
+    const burnEvents = this.burnEvents;
+
+    const totalLiquidityLocked = escrows.reduce((sum, escrow) => 
+      sum + parseFloat(escrow.lockedAmount || "0"), 0
+    );
+
+    const totalBurned = burnEvents.reduce((sum, event) => 
+      sum + parseFloat(event.amount), 0
+    );
+
+    const totalVolume = escrows.reduce((sum, escrow) => 
+      sum + parseFloat(escrow.currentVolume?.toString() || "0"), 0
+    );
+
+    const averageHolders = escrows.length > 0 
+      ? escrows.reduce((sum, escrow) => sum + (escrow.currentHolders || 0), 0) / escrows.length
+      : 0;
+
+    return {
+      id: "global",
+      totalTokensCreated: tokens.length,
+      totalVolumeUSD: totalVolume,
+      totalLiquidityLocked,
+      totalBurned,
+      averageHolders: Math.round(averageHolders)
+    };
   }
 
-  async updateStats(): Promise<Stats> {
-    // Simulate real-time updates
-    this.stats.totalVolume = (parseFloat(this.stats.totalVolume || "0") + Math.random() * 1000).toFixed(2);
-    this.stats.totalHolders = (this.stats.totalHolders || 0) + Math.floor(Math.random() * 3);
-    this.stats.updatedAt = new Date();
-    
-    return this.stats;
+  async updateStats(): Promise<any> {
+    // In real implementation, this would trigger recalculation of cached stats
+    return this.getStats();
   }
 }
 
+// Export storage instance
 export const storage = new MemStorage();
