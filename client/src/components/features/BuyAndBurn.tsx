@@ -1,10 +1,13 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Flame, Zap, TrendingUp, Activity } from "lucide-react";
+import { Flame, Zap, TrendingUp, Activity, ExternalLink } from "lucide-react";
 import { BURN_SOURCES } from "@/lib/constants";
 import { formatTimeAgo } from "@/lib/utils";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { solanaService } from "@/lib/solana";
+import { useToast } from "@/hooks/use-toast";
 import type { BurnEvent } from "@shared/schema";
 
 export function BuyAndBurn() {
@@ -13,13 +16,50 @@ export function BuyAndBurn() {
     refetchInterval: 5000,
   });
 
+  const { isConnected } = useSolanaWallet();
+  const { toast } = useToast();
+
   const totalBurned = 89234;
   const totalValueBurned = 5670;
   const availableFunds = { migration: 1200, fees: 340 };
 
+  const burnMutation = useMutation({
+    mutationFn: async () => {
+      if (!isConnected) {
+        throw new Error('Wallet no conectada');
+      }
+      
+      // Calculate amount to burn based on available funds
+      const totalFunds = availableFunds.migration + availableFunds.fees;
+      const amountToBurn = Math.floor(totalFunds * 100); // Simulate exchange rate
+      
+      return await solanaService.executeBuyAndBurn(amountToBurn.toString());
+    },
+    onSuccess: (result) => {
+      toast({
+        title: "Buy & Burn Ejecutado! 🔥",
+        description: `${result.amountBurned} $NOOT quemados exitosamente`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Error ejecutando buy & burn",
+        variant: "destructive",
+      });
+    },
+  });
+
   const handleManualBurn = () => {
-    console.log("Executing manual buy & burn...");
-    // TODO: Implement manual burn execution
+    if (!isConnected) {
+      toast({
+        title: "Wallet Requerida",
+        description: "Conecta tu wallet para ejecutar buy & burn",
+        variant: "destructive"
+      });
+      return;
+    }
+    burnMutation.mutate();
   };
 
   return (
@@ -76,12 +116,21 @@ export function BuyAndBurn() {
             {/* Manual Burn Button */}
             <Button 
               onClick={handleManualBurn}
+              disabled={burnMutation.isPending || !isConnected}
               className="w-full py-4 mt-6 bg-gradient-to-r from-orange-500 to-red-500 text-white font-semibold hover:opacity-90 transition-opacity"
               data-testid="button-manual-burn"
             >
               <Flame className="w-5 h-5 mr-2" />
-              Ejecutar Buy & Burn Manual
+              {burnMutation.isPending ? "Ejecutando Buy & Burn..." : 
+               !isConnected ? "Conecta Wallet para Ejecutar" : 
+               "Ejecutar Buy & Burn Manual"}
             </Button>
+            
+            {!isConnected && (
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Conecta tu wallet para ejecutar buy & burn automático
+              </p>
+            )}
           </CardContent>
         </Card>
         

@@ -1,11 +1,16 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { AMM_OPTIONS, PAIR_TOKENS } from "@/lib/constants";
+import { useSolanaWallet } from "@/hooks/useSolanaWallet";
+import { solanaService } from "@/lib/solana";
+import { useToast } from "@/hooks/use-toast";
+import { ExternalLink, Lock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PoolFormData {
@@ -17,6 +22,9 @@ interface PoolFormData {
 
 export function PoolCreation() {
   const [selectedAMM, setSelectedAMM] = useState("raydium");
+  const [transactionSignature, setTransactionSignature] = useState<string | null>(null);
+  const { isConnected } = useSolanaWallet();
+  const { toast } = useToast();
   
   const form = useForm<PoolFormData>({
     defaultValues: {
@@ -27,9 +35,50 @@ export function PoolCreation() {
     },
   });
 
+  const createPoolMutation = useMutation({
+    mutationFn: async (data: PoolFormData) => {
+      if (!isConnected) {
+        throw new Error('Wallet no conectada');
+      }
+      
+      // Create liquidity pool on Solana
+      const poolResult = await solanaService.createLiquidityPool({
+        tokenMint: "MAT_MOCK_MINT", // In real implementation, this would be the actual token mint
+        quoteMint: data.pairToken === "SOL" ? "So11111111111111111111111111111111111111112" : "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        tokenAmount: data.tokenAmount,
+        quoteAmount: data.pairAmount,
+        amm: data.amm as "raydium" | "orca"
+      });
+      
+      return poolResult;
+    },
+    onSuccess: (result) => {
+      setTransactionSignature(result.signature);
+      toast({
+        title: "Pool Creado Exitosamente! 🎉",
+        description: `Pool de liquidez creado en ${selectedAMM.charAt(0).toUpperCase() + selectedAMM.slice(1)}`,
+      });
+      form.reset();
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Hubo un problema creando el pool",
+        variant: "destructive",
+      });
+    },
+  });
+
   const onSubmit = (data: PoolFormData) => {
-    console.log("Pool creation:", data);
-    // TODO: Implement pool creation logic
+    if (!isConnected) {
+      toast({
+        title: "Wallet Requerida",
+        description: "Por favor conecta tu wallet de Solana para crear pools",
+        variant: "destructive"
+      });
+      return;
+    }
+    createPoolMutation.mutate(data);
   };
 
   const watchedValues = form.watch();
@@ -177,10 +226,41 @@ export function PoolCreation() {
                 <Button 
                   type="submit" 
                   className="w-full py-4 gradient-purple text-white font-semibold hover:opacity-90 transition-opacity"
+                  disabled={createPoolMutation.isPending || !isConnected}
                   data-testid="button-create-pool"
                 >
-                  Crear Pool (~0.05 SOL)
+                  {createPoolMutation.isPending ? "Creando Pool en Blockchain..." : 
+                   !isConnected ? "Conecta Wallet para Crear Pool" : 
+                   "Crear Pool de Liquidez (~0.05 SOL)"}
                 </Button>
+                
+                {!isConnected && (
+                  <p className="text-sm text-muted-foreground text-center mt-2">
+                    Necesitas conectar una wallet de Solana para crear pools
+                  </p>
+                )}
+                
+                {transactionSignature && (
+                  <Card className="bg-green-500/10 border-green-500/30 mt-4">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <div className="font-medium text-green-400">¡Pool Creado!</div>
+                          <div className="text-sm text-muted-foreground">60% LP bloqueado automáticamente</div>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(`https://solscan.io/tx/${transactionSignature}?cluster=devnet`, '_blank')}
+                          data-testid="button-view-pool-transaction"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Ver TX
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
               </form>
             </Form>
           </CardContent>
