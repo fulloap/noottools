@@ -27,6 +27,42 @@ export function useSolanaWallet() {
     init();
   }, [toast]);
 
+  // Auto-restore connection if Phantom is already connected
+  useEffect(() => {
+    const restoreConnection = async () => {
+      if (typeof window !== 'undefined' && window.solana && isInitialized) {
+        try {
+          // Try silent connection (only if already trusted)
+          await window.solana.connect({ onlyIfTrusted: true });
+          
+          if (window.solana.publicKey) {
+            console.log('🔄 Auto-restoring Phantom connection:', window.solana.publicKey.toString());
+            const restoredWallet: SolanaWallet = {
+              publicKey: window.solana.publicKey.toString(),
+              isConnected: true,
+              connect: async () => {
+                await window.solana!.connect();
+              },
+              disconnect: async () => {
+                await window.solana!.disconnect();
+                setWallet(null);
+              },
+              signTransaction: window.solana.signTransaction,
+              signMessage: window.solana.signMessage
+            };
+            setWallet(restoredWallet);
+            console.log('✅ Wallet connection restored successfully');
+          }
+        } catch (error) {
+          // Silent fail - this is normal if wallet isn't pre-approved
+          console.log('No existing wallet connection to restore');
+        }
+      }
+    };
+
+    restoreConnection();
+  }, [isInitialized]);
+
   // Connect wallet
   const connectWallet = useCallback(async () => {
     if (!isInitialized) {
@@ -61,11 +97,6 @@ export function useSolanaWallet() {
       setWallet(connectedWallet);
       
       console.log('Wallet connected successfully:', connectedWallet.publicKey);
-      console.log('Wallet state after connection:', {
-        publicKey: connectedWallet.publicKey,
-        isConnected: connectedWallet.isConnected,
-        walletObject: !!connectedWallet
-      });
       
       toast({
         title: "Wallet Conectada ✅",
@@ -121,14 +152,6 @@ export function useSolanaWallet() {
 
   // Check if wallet is connected
   const isConnected = wallet?.isConnected || false;
-  
-  // Debug logging for connection state
-  console.log('useSolanaWallet state:', {
-    walletExists: !!wallet,
-    walletPublicKey: wallet?.publicKey,
-    walletIsConnected: wallet?.isConnected,
-    computedIsConnected: isConnected
-  });
 
   // Get wallet address (shortened)
   const getShortAddress = useCallback(() => {

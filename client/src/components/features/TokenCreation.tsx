@@ -22,10 +22,10 @@ export function TokenCreation() {
   const { isConnected, wallet, publicKey } = useSolanaWallet();
   const [transactionSignature, setTransactionSignature] = useState<string | null>(null);
 
-  // Debug logging
-  console.log('TokenCreation render:', { 
+  // Debug wallet state
+  console.log('🔍 TokenCreation - Wallet State:', { 
     isConnected, 
-    publicKey, 
+    publicKey: publicKey ? `${publicKey.slice(0, 8)}...` : null,
     walletExists: !!wallet 
   });
   
