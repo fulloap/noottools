@@ -6,12 +6,24 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "next-themes";
 import { useEffect } from "react";
 import Home from "@/pages/home";
+import DocsPage from "@/pages/docs";
+import APIPage from "@/pages/api";
+import FAQPage from "@/pages/faq";
+import ContactPage from "@/pages/contact";
+import AuditsPage from "@/pages/audits";
+import GitHubPage from "@/pages/github";
 import NotFound from "@/pages/not-found";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/docs" component={DocsPage} />
+      <Route path="/api" component={APIPage} />
+      <Route path="/faq" component={FAQPage} />
+      <Route path="/contact" component={ContactPage} />
+      <Route path="/audits" component={AuditsPage} />
+      <Route path="/github" component={GitHubPage} />
       <Route component={NotFound} />
     </Switch>
   );

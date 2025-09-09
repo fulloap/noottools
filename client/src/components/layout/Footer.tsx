@@ -53,20 +53,20 @@ export function Footer() {
           <div>
             <h5 className="font-bold mb-4" data-testid="text-resources-title">Recursos</h5>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-docs">Documentación</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-api">API</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-github">GitHub</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-audits">Auditorías</a></li>
+              <li><a href="/docs" className="hover:text-primary transition-colors" data-testid="link-docs">Documentación</a></li>
+              <li><a href="/api" className="hover:text-primary transition-colors" data-testid="link-api">API</a></li>
+              <li><a href="/github" className="hover:text-primary transition-colors" data-testid="link-github">GitHub</a></li>
+              <li><a href="/audits" className="hover:text-primary transition-colors" data-testid="link-audits">Auditorías</a></li>
             </ul>
           </div>
           
           <div>
             <h5 className="font-bold mb-4" data-testid="text-support-title">Soporte</h5>
             <ul className="space-y-2 text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-discord">Discord</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-telegram">Telegram</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors" data-testid="link-contact">Contacto</a></li>
+              <li><a href="https://discord.gg/noottools" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" data-testid="link-discord">Discord</a></li>
+              <li><a href="https://t.me/noottools" target="_blank" rel="noopener noreferrer" className="hover:text-primary transition-colors" data-testid="link-telegram">Telegram</a></li>
+              <li><a href="/faq" className="hover:text-primary transition-colors" data-testid="link-faq">FAQ</a></li>
+              <li><a href="/contact" className="hover:text-primary transition-colors" data-testid="link-contact">Contacto</a></li>
             </ul>
           </div>
         </div>
